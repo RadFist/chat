@@ -9,21 +9,43 @@ if (isset($_POST['submit'])){
     $stmt->bind_param("s", $user);//isi dari tanda tanya yang bertipe s atau string
     $stmt->execute(); //menjalankan statemen
     $result = $stmt->get_result();
-    if($result->num_rows > 0 ){
+    if($result->num_rows > 0 ){   //cek adakah usernamenya
         $data_tamp = $result->fetch_assoc(); //mengambil data query menjadi array
-        if(password_verify($pass,$data_tamp["password"])){
+        if(password_verify($pass,$data_tamp["password"])){  //verif password
         $_SESSION["user"] = array(
         "id_login"=>$data_tamp["id_login"],
         "username"=>$data_tamp["username"]
-        );
-        $aktif = $_SESSION["user"]["id_login"];
+        ); //mengambil data untuk sesi dengan nama user
+        $aktif = $_SESSION["user"]["id_login"]; 
         $connection->query("UPDATE tb_login SET status='online' WHERE id_login='$aktif'");
         header("location: public/menu_chat.php");
         }else{
-            header("location: index.php?error");
+            // menampilkan kesalahan box berubah warna dan pesan kesalahan pada username dan password  
+        echo "
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = document.getElementById('username'); 
+            const password = document.getElementById('password');
+            const error_msg_pass= document.getElementById('error_msg_pass');
+            
+            username.classList.add('worng-input'); // menambah class wrong input
+            password.classList.add('worng-input'); // menambah class wrong input
+            error_msg_pass.removeAttribute('hidden'); //meremove atribute hidden
+        });        
+        </script>";
         }
     }else{
-        header("location: index.php?error");
+        //menampilkan kesalahan box username dan pesan kesalahan
+        echo "
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const username = document.getElementById('username');
+            const error_msg = document.getElementById('error_msg');
+            
+            username.classList.add('worng-input');
+            error_msg.removeAttribute('hidden');
+        });        
+        </script>";
     }
 }
 ?>
@@ -35,6 +57,7 @@ if (isset($_POST['submit'])){
     <!-- bootstrapt -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style/style.css">
     <title>Login</title>
 </head>
 <body>
@@ -52,12 +75,14 @@ if (isset($_POST['submit'])){
                                 <label for="username">username</label>
                                 <input type="text" name="username" id="username" class="form-control" required>
                             </div>
-                            <div class="form-grup mt-2">
+                            <div class="form-grup mt-2 mb-2">
                                 <label for="password">password</label>
                                 <input type="password" name="password" id="password" class="form-control" required>
                             </div>
-                        <input type="Submit" name="submit" value="Login" class="mt-3 btn bg-primary " >
-                </form>
+                        <p hidden id="error_msg" class="text-danger">*username tidak di temukan</p>
+                        <p hidden id="error_msg_pass" class="text-danger">*username atau password tidak cocok</p>
+                        <input type="Submit" name="submit" value="Login" class="btn bg-primary " >
+                    </form>
                 <a href="register.php">dont have a acount?</a>
             </div>
         </div>
